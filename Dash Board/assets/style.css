@@ -1,0 +1,36 @@
+body {
+  background-color: #150128;
+  margin: 5%;
+}
+
+.background-container::before {
+  content: ""; /* Required to generate the pseudo-element */
+  position: absolute; /* Position it inside the container */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("/assets/gradient.png"); /* Path to your PNG image */
+  background-size: cover; /* Make sure the image covers the entire container */
+  background-position: center; /* Center the image */
+  opacity: 0.4; /* Set opacity for the background image */
+  z-index: -1; /* Make sure the image stays behind the content */
+}
+
+.app-content {
+  position: relative;
+  z-index: 1;
+}
+
+.glass-container {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.verticle-container {
+  gap: 15px;
+}

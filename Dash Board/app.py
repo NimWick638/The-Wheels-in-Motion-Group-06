@@ -1,6 +1,7 @@
 import pandas as pd
 import plotly.express as px
 from dash import Dash, dcc, html, Input, Output
+from geopy.geocoders import Nominatim
 
 # Load data
 df = pd.read_csv('Cleaned_PassengerVehicle_Stats2.csv')
@@ -9,6 +10,23 @@ df = pd.read_csv('Cleaned_PassengerVehicle_Stats2.csv')
 wheelchair_grouped_data = df.groupby(['Vehicle Type', 'Wheelchair Accessible']).size().reset_index(name='wheelchair_count')
 status_counts = df['Status'].value_counts().reset_index()
 status_counts.columns = ['Status', 'Count']
+
+# Geocode function
+geolocator = Nominatim(user_agent="vehicle_dashboard")
+def geocode_zip(zip_code):
+    try:
+        location = geolocator.geocode({"postalcode": str(int(zip_code)), "country": "United States"})
+        if location:
+            return location.latitude, location.longitude
+    except:
+        return None, None
+
+# Prepare ZIP code distribution data
+zip_code_distribution = df['ZIP Code'].value_counts().reset_index()
+zip_code_distribution.columns = ['ZIP Code', 'Count']
+zip_code_distribution[['Latitude', 'Longitude']] = zip_code_distribution['ZIP Code'].apply(
+    lambda z: pd.Series(geocode_zip(z))
+)
 
 # Wheelchair Accessibility Chart
 wheelchair_bar_fig = px.bar(
@@ -26,8 +44,8 @@ wheelchair_bar_fig = px.bar(
 wheelchair_bar_fig.update_layout(
     paper_bgcolor="rgba(0,0,0,0)",  
     plot_bgcolor="rgba(0,0,0,0)",  
-    title_font=dict(size=20, color="black"),  
-    font=dict(color="black"), 
+    title_font=dict(size=20, color="white"),  
+    font=dict(color="white"), 
     yaxis=dict(
         dtick=500,
         showgrid=True,               
@@ -46,7 +64,7 @@ wheelchair_bar_fig.update_layout(
         'font': {
             'size': 24,
             'family':"Arial, sans-serif",
-            'color': "black"
+            'color': "white"
         }
     }
 )
@@ -63,7 +81,7 @@ app.layout = html.Div(
     },
     children=[
         html.H1(
-            "Wheel in the Motion",
+            "The Wheels in Motion",
             style={
                 'textAlign': 'center',
                 'fontSize': '70px',
@@ -111,23 +129,54 @@ app.layout = html.Div(
                 'gap': '15px'
             },
             children=[
-                html.Div(dcc.Graph(id='bar-chart'))
+                html.Div(dcc.Graph(id='bar-chart', className='glass-container')),
+                html.Div(dcc.Graph(id='pie-chart', className='glass-container'))
             ]
         ),
+
         html.Div(
-            dcc.Graph(id='wheelchair-accessibility-bar-chart',figure=wheelchair_bar_fig))
-])
+            style={
+                'display': 'flex',
+                'flexDirection': 'row',
+                'alignItems': 'center',
+                'justifyContent': 'center',
+                'gap': '15px'
+            },
+            children=[
+               html.Div(dcc.Graph(id='map-chart', className='glass-container')),
+               html.Div(dcc.Graph(id='hist-chart', className='glass-container'))
+            ]
+            ),
+        html.Div(
+            style={
+                'display': 'flex',
+                'flexDirection': 'row',
+                'alignItems': 'center',
+                'justifyContent': 'center',
+                'gap': '15px'
+            },
+            children=[
+                html.Div(dcc.Graph(id='wheelchair-accessibility-bar-chart',figure=wheelchair_bar_fig, className='glass-container'))
+            ]
+        )
+],
+className='body app-content background-container verticle-container'
+)
 
 # Callbacks for updating graphs
 @app.callback(
-    Output('bar-chart', 'figure'),
-    Input('vehicle-type-dropdown', 'value')
+   [ Output('bar-chart', 'figure'),
+     Output('pie-chart', 'figure'),
+     Output('map-chart', 'figure'),
+     Output('hist-chart', 'figure'),
+   ],
+    [Input('vehicle-type-dropdown', 'value')]
 )
 
 def update_charts(vehicle_type):
     # Filter data based on dropdown selection
     filtered_df = df[df['Vehicle Type'] == vehicle_type] if vehicle_type else df
-    
+    filtered_zip = zip_code_distribution[zip_code_distribution['ZIP Code'].isin(filtered_df['ZIP Code'].unique())]
 
     # Bar Chart
     status_counts_filtered = filtered_df['Status'].value_counts().reset_index()
@@ -143,8 +192,8 @@ def update_charts(vehicle_type):
     bar_fig.update_layout(
     paper_bgcolor="rgba(0,0,0,0)",  
     plot_bgcolor="rgba(0,0,0,0)",  
-    title_font=dict(size=20, color="black"),  
-    font=dict(color="black"), 
+    title_font=dict(size=20, color="white"),  
+    font=dict(color="white"), 
     yaxis=dict(
         dtick=500,
         showgrid=True,               
@@ -164,11 +213,109 @@ def update_charts(vehicle_type):
         'font': {
             'size': 24,
             'family':"Arial, sans-serif",
-            'color': "black"
+            'color': "white"
         }
     }
    )
-    return bar_fig
+    # Pie Chart
+    pie_fig = px.pie(
+        filtered_df, names="Vehicle Fuel Source",
+        title="Fuel Source Distribution",
+        width=700, height=600
+    )
+
+    pie_fig.update_layout(
+    paper_bgcolor="rgba(0,0,0,0)",  
+    title_font=dict(size=20, color="white"),  
+    font=dict(color="white"), 
+    yaxis=dict(
+        dtick=500,
+        showgrid=True,               
+        gridcolor='rgba(169, 169, 169, 0.3)' 
+    ),
+    xaxis=dict(
+        showgrid=False,               
+        gridcolor='rgba(169, 169, 169, 0.3)'
+    ),
+    title={
+        'text': 'Fuel Source Distribution',
+        'x': 0.5,
+        'xanchor': 'center',
+        'y': 0.95,
+        'yanchor':'top',
+        'font': {
+            'size': 24,
+            'family':"Arial, sans-serif",
+            'color': "white"
+        }
+    }
+    )
+
+    # Map Chart
+    map_fig = px.scatter_mapbox(
+        filtered_zip,
+        lat='Latitude', lon='Longitude', size='Count', color='Count',
+        hover_name='ZIP Code', mapbox_style='open-street-map',
+        title='Vehicle Distribution by ZIP Code',
+        width=700, height=600
+    )
+
+    map_fig.update_layout(
+    paper_bgcolor="rgba(0,0,0,0)",  
+    plot_bgcolor="rgba(0,0,0,0)", 
+    title_font=dict(size=20, color="black"),  
+    font=dict(color="black"), 
+
+    title={
+        'text': 'Vehicle Distribution accross State',
+        'x': 0.5,
+        'xanchor': 'center',
+        'y': 0.95,
+        'yanchor':'top',
+        'font': {
+            'size': 24,
+            'family':"Arial, sans-serif",
+            'color': "white"
+        }
+    }
+   ) 
+
+    # Histogram
+    hist_fig = px.histogram(
+        filtered_df, x='Vehicle Model Year',
+        title='Vehicle Count by Model Year',
+        width=700, height=600
+    )
+
+    hist_fig.update_layout(
+    paper_bgcolor="rgba(0,0,0,0)",  
+    plot_bgcolor="rgba(0,0,0,0)",  
+    title_font=dict(size=20, color="white"),  
+    font=dict(color="white"), 
+    yaxis=dict(
+        dtick=500,
+        showgrid=True,               
+        gridcolor='rgba(169, 169, 169, 0.3)' 
+       
+    ),
+    xaxis=dict(
+        showgrid=False,               
+        gridcolor='rgba(169, 169, 169, 0.3)'
+    ),
+    title={
+        'text': 'Vehicle Makes Over the Years',
+        'x': 0.5,
+        'xanchor': 'center',
+        'y': 0.95,
+        'yanchor':'top',
+        'font': {
+            'size': 24,
+            'family':"Arial, sans-serif",
+            'color': "white"
+        }
+    }
+    )
+    return bar_fig, pie_fig, map_fig, hist_fig
 
 
 if __name__ == '__main__':
