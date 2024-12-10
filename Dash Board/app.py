@@ -88,8 +88,8 @@ app.layout = html.Div(
                 'color': '#7e79f8',
                 'fontFamily': 'Arial, sans-serif',
                 'fontWeight': 'bold',
-                'marginTop': '20px',
-                'marginBottom': '10px'
+                'marginTop': 'auto',
+                'marginBottom': '5px'
             }
         ),
         html.H2(
@@ -109,6 +109,7 @@ app.layout = html.Div(
         options=[{'label': vtype, 'value': vtype} for vtype in df['Vehicle Type'].unique()],
         placeholder="Select a Vehicle Type",
         clearable=True,
+        className='custom-dropdown',
         style={
                 'width': '50%',
                 'margin': '10px auto',
@@ -116,7 +117,13 @@ app.layout = html.Div(
                 'borderRadius': '5px',
                 'border': '1px solid #ccc',
                 'textAlign':'center',
-                'fontSize':'20px'
+                'fontSize':'20px',
+                'background': 'rgba(255, 255, 255, 0.1)',
+                'backdropFilter': 'blur(10px)',
+                'color': 'white',
+                'fontFamily': 'Courier New, monospace',
+                'boxShadow': '0 4px 6px rgba(0, 0, 0, 0.1)',
+                'position':'relative'
             }
         ),
 
