@@ -143,7 +143,9 @@ app.layout = html.Div(
                 'gap': '15px'
             },
             children=[
-            html.Div(dcc.Graph(id='map-chart'))]
+               html.Div(dcc.Graph(id='map-chart')),
+               html.Div(dcc.Graph(id='hist-chart'))
+            ]
             ),
         html.Div(
             dcc.Graph(id='wheelchair-accessibility-bar-chart',figure=wheelchair_bar_fig))
@@ -152,8 +154,9 @@ app.layout = html.Div(
 # Callbacks for updating graphs
 @app.callback(
    [ Output('bar-chart', 'figure'),
-    Output('pie-chart', 'figure'),
-    Output('map-chart', 'figure')
+     Output('pie-chart', 'figure'),
+     Output('map-chart', 'figure'),
+     Output('hist-chart', 'figure'),
    ],
     [Input('vehicle-type-dropdown', 'value')]
 )
@@ -264,7 +267,43 @@ def update_charts(vehicle_type):
         }
     }
    ) 
-    return bar_fig, pie_fig, map_fig
+
+    # Histogram
+    hist_fig = px.histogram(
+        filtered_df, x='Vehicle Model Year',
+        title='Vehicle Count by Model Year',
+        width=700, height=600
+    )
+
+    hist_fig.update_layout(
+    paper_bgcolor="rgba(0,0,0,0)",  
+    plot_bgcolor="rgba(0,0,0,0)",  
+    title_font=dict(size=20, color="black"),  
+    font=dict(color="black"), 
+    yaxis=dict(
+        dtick=500,
+        showgrid=True,               
+        gridcolor='rgba(169, 169, 169, 0.3)' 
+       
+    ),
+    xaxis=dict(
+        showgrid=False,               
+        gridcolor='rgba(169, 169, 169, 0.3)'
+    ),
+    title={
+        'text': 'Vehicle Makes Over the Years',
+        'x': 0.5,
+        'xanchor': 'center',
+        'y': 0.95,
+        'yanchor':'top',
+        'font': {
+            'size': 24,
+            'family':"Arial, sans-serif",
+            'color': "black"
+        }
+    }
+    )
+    return bar_fig, pie_fig, map_fig, hist_fig
 
 
 if __name__ == '__main__':
