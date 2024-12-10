@@ -111,7 +111,8 @@ app.layout = html.Div(
                 'gap': '15px'
             },
             children=[
-                html.Div(dcc.Graph(id='bar-chart'))
+                html.Div(dcc.Graph(id='bar-chart', className='glass-container')),
+                html.Div(dcc.Graph(id='pie-chart', className='glass-container'))
             ]
         ),
         html.Div(
@@ -120,14 +121,15 @@ app.layout = html.Div(
 
 # Callbacks for updating graphs
 @app.callback(
-    Output('bar-chart', 'figure'),
-    Input('vehicle-type-dropdown', 'value')
+   [ Output('bar-chart', 'figure'),
+    Output('pie-chart', 'figure')
+   ],
+    [Input('vehicle-type-dropdown', 'value')]
 )
 
 def update_charts(vehicle_type):
     # Filter data based on dropdown selection
     filtered_df = df[df['Vehicle Type'] == vehicle_type] if vehicle_type else df
-    
 
     # Bar Chart
     status_counts_filtered = filtered_df['Status'].value_counts().reset_index()
@@ -168,7 +170,40 @@ def update_charts(vehicle_type):
         }
     }
    )
-    return bar_fig
+    # Pie Chart
+    pie_fig = px.pie(
+        filtered_df, names="Vehicle Fuel Source",
+        title="Fuel Source Distribution",
+        width=700, height=600
+    )
+
+    pie_fig.update_layout(
+    paper_bgcolor="rgba(0,0,0,0)",  
+    title_font=dict(size=20, color="white"),  
+    font=dict(color="white"), 
+    yaxis=dict(
+        dtick=500,
+        showgrid=True,               
+        gridcolor='rgba(169, 169, 169, 0.3)' 
+    ),
+    xaxis=dict(
+        showgrid=False,               
+        gridcolor='rgba(169, 169, 169, 0.3)'
+    ),
+    title={
+        'text': 'Fuel Source Distribution',
+        'x': 0.5,
+        'xanchor': 'center',
+        'y': 0.95,
+        'yanchor':'top',
+        'font': {
+            'size': 24,
+            'family':"Arial, sans-serif",
+            'color': "white"
+        }
+    }
+    ) 
+    return bar_fig, pie_fig
 
 
 if __name__ == '__main__':
