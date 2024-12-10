@@ -44,8 +44,8 @@ wheelchair_bar_fig = px.bar(
 wheelchair_bar_fig.update_layout(
     paper_bgcolor="rgba(0,0,0,0)",  
     plot_bgcolor="rgba(0,0,0,0)",  
-    title_font=dict(size=20, color="black"),  
-    font=dict(color="black"), 
+    title_font=dict(size=20, color="white"),  
+    font=dict(color="white"), 
     yaxis=dict(
         dtick=500,
         showgrid=True,               
@@ -64,7 +64,7 @@ wheelchair_bar_fig.update_layout(
         'font': {
             'size': 24,
             'family':"Arial, sans-serif",
-            'color': "black"
+            'color': "white"
         }
     }
 )
@@ -81,7 +81,7 @@ app.layout = html.Div(
     },
     children=[
         html.H1(
-            "Wheel in the Motion",
+            "The Wheels in Motion",
             style={
                 'textAlign': 'center',
                 'fontSize': '70px',
@@ -129,8 +129,8 @@ app.layout = html.Div(
                 'gap': '15px'
             },
             children=[
-                html.Div(dcc.Graph(id='bar-chart')),
-                html.Div(dcc.Graph(id='pie-chart'))
+                html.Div(dcc.Graph(id='bar-chart', className='glass-container')),
+                html.Div(dcc.Graph(id='pie-chart', className='glass-container'))
             ]
         ),
 
@@ -143,13 +143,25 @@ app.layout = html.Div(
                 'gap': '15px'
             },
             children=[
-               html.Div(dcc.Graph(id='map-chart')),
-               html.Div(dcc.Graph(id='hist-chart'))
+               html.Div(dcc.Graph(id='map-chart', className='glass-container')),
+               html.Div(dcc.Graph(id='hist-chart', className='glass-container'))
             ]
             ),
         html.Div(
-            dcc.Graph(id='wheelchair-accessibility-bar-chart',figure=wheelchair_bar_fig))
-])
+            style={
+                'display': 'flex',
+                'flexDirection': 'row',
+                'alignItems': 'center',
+                'justifyContent': 'center',
+                'gap': '15px'
+            },
+            children=[
+                html.Div(dcc.Graph(id='wheelchair-accessibility-bar-chart',figure=wheelchair_bar_fig, className='glass-container'))
+            ]
+        )
+],
+className='body app-content background-container verticle-container'
+)
 
 # Callbacks for updating graphs
 @app.callback(
@@ -180,8 +192,8 @@ def update_charts(vehicle_type):
     bar_fig.update_layout(
     paper_bgcolor="rgba(0,0,0,0)",  
     plot_bgcolor="rgba(0,0,0,0)",  
-    title_font=dict(size=20, color="black"),  
-    font=dict(color="black"), 
+    title_font=dict(size=20, color="white"),  
+    font=dict(color="white"), 
     yaxis=dict(
         dtick=500,
         showgrid=True,               
@@ -201,7 +213,7 @@ def update_charts(vehicle_type):
         'font': {
             'size': 24,
             'family':"Arial, sans-serif",
-            'color': "black"
+            'color': "white"
         }
     }
    )
@@ -214,8 +226,8 @@ def update_charts(vehicle_type):
 
     pie_fig.update_layout(
     paper_bgcolor="rgba(0,0,0,0)",  
-    title_font=dict(size=20, color="black"),  
-    font=dict(color="black"), 
+    title_font=dict(size=20, color="white"),  
+    font=dict(color="white"), 
     yaxis=dict(
         dtick=500,
         showgrid=True,               
@@ -234,7 +246,7 @@ def update_charts(vehicle_type):
         'font': {
             'size': 24,
             'family':"Arial, sans-serif",
-            'color': "black"
+            'color': "white"
         }
     }
     )
@@ -263,7 +275,7 @@ def update_charts(vehicle_type):
         'font': {
             'size': 24,
             'family':"Arial, sans-serif",
-            'color': "black"
+            'color': "white"
         }
     }
    ) 
@@ -278,8 +290,8 @@ def update_charts(vehicle_type):
     hist_fig.update_layout(
     paper_bgcolor="rgba(0,0,0,0)",  
     plot_bgcolor="rgba(0,0,0,0)",  
-    title_font=dict(size=20, color="black"),  
-    font=dict(color="black"), 
+    title_font=dict(size=20, color="white"),  
+    font=dict(color="white"), 
     yaxis=dict(
         dtick=500,
         showgrid=True,               
@@ -299,7 +311,7 @@ def update_charts(vehicle_type):
         'font': {
             'size': 24,
             'family':"Arial, sans-serif",
-            'color': "black"
+            'color': "white"
         }
     }
     )
